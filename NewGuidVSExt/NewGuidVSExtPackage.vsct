@@ -36,8 +36,11 @@
          group as the part of a menu contained between two lines. The parent of a group
          must be a menu. -->
     <Groups>
-      <Group guid="guidNewGuidVSExtPackageCmdSet" id="MyMenuGroup" priority="0x0300">
+      <Group guid="guidNewGuidVSExtPackageCmdSet" id="MyMenuFileGroup" priority="0x0300">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE"/>
+      </Group>
+      <Group guid="guidNewGuidVSExtPackageCmdSet" id="MyMenuSelectionGroup" priority="0x0300">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
       </Group>
     </Groups>
 
@@ -52,11 +55,21 @@
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-      <Button guid="guidNewGuidVSExtPackageCmdSet" id="NewGuidVSExtId" priority="0x0100" type="Button">
-        <Parent guid="guidNewGuidVSExtPackageCmdSet" id="MyMenuGroup" />
+      <Button guid="guidNewGuidVSExtPackageCmdSet" id="NewGuidVSExtFileId" priority="0x0100" type="Button">
+        <Parent guid="guidNewGuidVSExtPackageCmdSet" id="MyMenuFileGroup" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
-          <ButtonText>Refresh all GUIDs in File...</ButtonText>
+          <ButtonText>Refresh all GUIDs in File</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidNewGuidVSExtPackageCmdSet" id="NewGuidVSExtSelectionId" priority="0x0100" type="Button">
+        <Parent guid="guidNewGuidVSExtPackageCmdSet" id="MyMenuSelectionGroup" />
+        <Icon guid="guidImages" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Refresh GUIDs in selection</ButtonText>
         </Strings>
       </Button>
     </Buttons>
@@ -77,9 +90,13 @@
     <GuidSymbol name="guidNewGuidVSExtPackage" value="{874bee2c-77c7-4ce6-ba1c-5608a2f3b57b}" />
 
     <!-- This is the guid used to group the menu commands together -->
+
     <GuidSymbol name="guidNewGuidVSExtPackageCmdSet" value="{6117e7c1-7a4f-4239-ad04-d05a0de80a93}">
-      <IDSymbol name="MyMenuGroup" value="0x1020" />
-      <IDSymbol name="NewGuidVSExtId" value="0x0100" />
+      <IDSymbol name="MyMenuFileGroup" value="0x1020" />
+      <IDSymbol name="NewGuidVSExtFileId" value="0x0100" />
+
+      <IDSymbol name="MyMenuSelectionGroup" value="0x1021" />
+      <IDSymbol name="NewGuidVSExtSelectionId" value="0x0101" />
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{99bb2d55-d932-4236-b3cb-2a9ad0903ba1}" >

@@ -14,6 +14,7 @@ using EnvDTE80;
 using EnvDTE;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace MBFVSolutions.NewGuidVSExt
 {
@@ -25,7 +26,9 @@ namespace MBFVSolutions.NewGuidVSExt
         /// <summary>
         /// Command ID.
         /// </summary>
-        public const int CommandId = 0x0100;
+        public const int FileCommandId = 0x0100;
+        public const int SelectionCommandId = 0x0101;
+        public const string GuidPattern = @"[0-9A-Fa-f]{8}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{12}";
 
         /// <summary>
         /// Command menu group (command set GUID).
@@ -36,6 +39,8 @@ namespace MBFVSolutions.NewGuidVSExt
         /// VS Package that provides this command, not null.
         /// </summary>
         private readonly Package package;
+
+        private Regex GuidRegex = new Regex(GuidPattern);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NewGuidVSExt"/> class.
@@ -54,9 +59,23 @@ namespace MBFVSolutions.NewGuidVSExt
             OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (commandService != null)
             {
-                var menuCommandID = new CommandID(CommandSet, CommandId);
-                var menuItem = new MenuCommand(this.MenuItemCallback, menuCommandID);
-                commandService.AddCommand(menuItem);
+                var dte = (DTE2)ServiceProvider.GetService(typeof(DTE));
+
+                var fileMenuCommandId = new CommandID(CommandSet, FileCommandId);
+                var fileMenuItem = new OleMenuCommand(this.MenuItemFileCallback, fileMenuCommandId);
+                commandService.AddCommand(fileMenuItem);
+
+                var selectionMenuCommandId = new CommandID(CommandSet, SelectionCommandId);
+                var selectionMenuItem = new OleMenuCommand(this.MenuItemSelectionCallback, selectionMenuCommandId);
+                selectionMenuItem.BeforeQueryStatus += (objSender, evt) =>
+                {
+                    var sender = (OleMenuCommand)objSender;
+
+                    var doc = (TextDocument)dte.ActiveDocument?.Object("TextDocument");
+                    var selection = doc?.Selection;
+                    sender.Visible = selection != null && !dte.ActiveDocument.ReadOnly;
+                };
+                commandService.AddCommand(selectionMenuItem);
             }
         }
 
@@ -89,6 +108,49 @@ namespace MBFVSolutions.NewGuidVSExt
             Instance = new NewGuidVSExt(package);
         }
 
+        private string ReplaceGuids(string contents)
+        {
+            return GuidRegex.Replace(contents, (match) => Guid.NewGuid().ToString());
+        }
+
+        private void MenuItemSelectionCallback(object sender, EventArgs e)
+        {
+            var dte = (DTE2)ServiceProvider.GetService(typeof(DTE));
+            if (dte.ActiveDocument.ReadOnly)
+            {
+                return;
+            }
+            var doc = (TextDocument)dte.ActiveDocument?.Object("TextDocument");
+            var selection = doc?.Selection;
+            if (selection == null)
+            {
+                return;
+            }
+
+            // We want to replace the whole range covered by the selection, but only update selected regions.
+            // This will ensure only one undo point will be created while still handling disjointed selections
+            // (like block regions) correctly.
+            StringBuilder replacedText = new StringBuilder();
+            EditPoint previousRangeEnd = null;
+            foreach (var range in selection.TextRanges.Cast<TextRange>())
+            {
+                if (previousRangeEnd != null)
+                {
+                    replacedText.Append(previousRangeEnd.GetText(range.StartPoint));
+                }
+                var text = range.StartPoint.GetText(range.EndPoint);
+                var replaced = ReplaceGuids(text);
+                replacedText.Append(replaced);
+
+                previousRangeEnd = range.EndPoint;
+            }
+            // TextRanges is apparently 1-indexed
+            var startPoint = selection.TextRanges.Item(1).StartPoint;
+            var endPoint = selection.TextRanges.Item(selection.TextRanges.Count).EndPoint;
+
+            startPoint.ReplaceText(endPoint, replacedText.ToString(), (int)vsEPReplaceTextOptions.vsEPReplaceTextKeepMarkers);
+        }
+
         /// <summary>
         /// This function is the callback used to execute the command when the menu item is clicked.
         /// See the constructor to see how the menu item is associated with this function using
@@ -96,7 +158,7 @@ namespace MBFVSolutions.NewGuidVSExt
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event args.</param>
-        private void MenuItemCallback(object sender, EventArgs e)
+        private void MenuItemFileCallback(object sender, EventArgs e)
         {
             var dte = (DTE2)ServiceProvider.GetService(typeof(DTE));
             List<string> fileList;
@@ -111,14 +173,7 @@ namespace MBFVSolutions.NewGuidVSExt
                         fileContents = sr.ReadToEnd();
                     }
 
-                    Regex regex = new Regex(@"[0-9A-Fa-f]{8}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{12}");
-
-                    var matches = regex.Matches(fileContents);
-
-                    foreach( var match in matches)
-                    {
-                        fileContents = fileContents.Replace(match.ToString(), Guid.NewGuid().ToString());
-                    }
+                    fileContents = ReplaceGuids(fileContents);
 
                     using (System.IO.StreamWriter sw = new System.IO.StreamWriter(file, false))
                     {
