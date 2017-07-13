@@ -39,9 +39,6 @@
       <Group guid="guidNewGuidVSExtPackageCmdSet" id="MyMenuFileGroup" priority="0x0300">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE"/>
       </Group>
-      <Group guid="guidNewGuidVSExtPackageCmdSet" id="MyMenuSelectionGroup" priority="0x0300">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
-      </Group>
     </Groups>
 
     <!--Buttons section. -->
@@ -57,20 +54,20 @@
           If you do not want an image next to your command, remove the Icon node /> -->
       <Button guid="guidNewGuidVSExtPackageCmdSet" id="NewGuidVSExtFileId" priority="0x0100" type="Button">
         <Parent guid="guidNewGuidVSExtPackageCmdSet" id="MyMenuFileGroup" />
-        <CommandFlag>DynamicVisibility</CommandFlag>
-        <CommandFlag>DefaultInvisible</CommandFlag>
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
           <ButtonText>Refresh all GUIDs in File</ButtonText>
         </Strings>
       </Button>
 
-      <Button guid="guidNewGuidVSExtPackageCmdSet" id="NewGuidVSExtSelectionId" priority="0x0100" type="Button">
-        <Parent guid="guidNewGuidVSExtPackageCmdSet" id="MyMenuSelectionGroup" />
+      <Button guid="guidNewGuidVSExtPackageCmdSet" id="NewGuidVSExtSelectionId" priority="0x0400" type="Button">
+        <Parent guid="guidSHLMainMenu" id="mainMenuRefactorGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
           <ButtonText>Refresh GUIDs in selection</ButtonText>
         </Strings>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <!--<CommandFlag>DefaultInvisible</CommandFlag> -->
       </Button>
     </Buttons>
 
@@ -97,6 +94,10 @@
 
       <IDSymbol name="MyMenuSelectionGroup" value="0x1021" />
       <IDSymbol name="NewGuidVSExtSelectionId" value="0x0101" />
+    </GuidSymbol>
+
+    <GuidSymbol name="guidSHLMainMenu" value="Extern" >
+      <IDSymbol name="mainMenuRefactorGroup" value="0x02d0" />
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{99bb2d55-d932-4236-b3cb-2a9ad0903ba1}" >
