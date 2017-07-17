@@ -118,7 +118,16 @@ namespace MBFVSolutions.NewGuidVSExt
 
         private string ReplaceGuids(string contents)
         {
-            return GuidRegex.Replace(contents, (match) => Guid.NewGuid().ToString());
+            return GuidRegex.Replace(contents, (match) =>
+            {
+                var guid = Guid.NewGuid().ToString();
+                // match case of old guid
+                if (match.Value.ToUpperInvariant() == match.Value)
+                {
+                    guid = guid.ToUpperInvariant();
+                }
+                return guid;
+            });
         }
 
         private void MenuItemSelectionCallback(object sender, EventArgs e)
