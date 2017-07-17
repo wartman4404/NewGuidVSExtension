@@ -40,6 +40,7 @@ namespace MBFVSolutions.NewGuidVSExt
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(NewGuidVSExtPackage.PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
+    [ProvideAutoLoad(UIContextGuids80.SolutionExists)]
     public sealed class NewGuidVSExtPackage : Package
     {
         /// <summary>

@@ -67,7 +67,7 @@
           <ButtonText>Refresh GUIDs in selection</ButtonText>
         </Strings>
         <CommandFlag>DynamicVisibility</CommandFlag>
-        <!--<CommandFlag>DefaultInvisible</CommandFlag> -->
+        <CommandFlag>DefaultInvisible</CommandFlag>
       </Button>
     </Buttons>
 

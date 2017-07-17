@@ -73,7 +73,15 @@ namespace MBFVSolutions.NewGuidVSExt
 
                     var doc = (TextDocument)dte.ActiveDocument?.Object("TextDocument");
                     var selection = doc?.Selection;
-                    sender.Visible = selection != null && !dte.ActiveDocument.ReadOnly;
+                    var empty = selection?.IsEmpty ?? true;
+                    if (!empty && !dte.ActiveDocument.ReadOnly)
+                    {
+                        sender.Visible = selection.TextRanges.Cast<TextRange>().Any(range => GuidRegex.IsMatch(range.StartPoint.GetText(range.EndPoint)));
+                    }
+                    else
+                    {
+                        sender.Visible = false;
+                    }
                 };
                 commandService.AddCommand(selectionMenuItem);
             }
