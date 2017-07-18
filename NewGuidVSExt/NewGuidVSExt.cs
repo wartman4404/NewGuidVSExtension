@@ -28,7 +28,10 @@ namespace MBFVSolutions.NewGuidVSExt
         /// </summary>
         public const int FileCommandId = 0x0100;
         public const int SelectionCommandId = 0x0101;
-        public const string GuidPattern = @"[0-9A-Fa-f]{8}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{12}";
+
+        private const string GuidWithHyphens = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}";
+        private const string GuidWithoutHyphens = "[0-9A-Fa-f]{32}";
+        public const string GuidPattern = @"\b(?:" + GuidWithHyphens + "|" + GuidWithoutHyphens + @")\b";
 
         /// <summary>
         /// Command menu group (command set GUID).
@@ -120,7 +123,11 @@ namespace MBFVSolutions.NewGuidVSExt
         {
             return GuidRegex.Replace(contents, (match) =>
             {
-                var guid = Guid.NewGuid().ToString();
+                // omit dashes if old guid didn't have them
+                var guid = match.Length != 32
+                    ? Guid.NewGuid().ToString("D")
+                    : Guid.NewGuid().ToString("N");
+
                 // match case of old guid
                 if (match.Value.ToUpperInvariant() == match.Value)
                 {
