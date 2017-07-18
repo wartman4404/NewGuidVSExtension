@@ -43,7 +43,7 @@ namespace MBFVSolutions.NewGuidVSExt
         /// </summary>
         private readonly Package package;
 
-        private Regex GuidRegex = new Regex(GuidPattern);
+        private Regex GuidRegex = new Regex(GuidPattern, RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NewGuidVSExt"/> class.
